@@ -1,6 +1,9 @@
+using DiningHall.Models;
+
 namespace DiningHall.Services;
 
 public interface IOrderService
 {
-    public Task PostAsync();
+    public Order GenerateOrder();
+    public Task PostAsync(Order order);
 }
