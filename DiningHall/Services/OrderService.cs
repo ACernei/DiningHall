@@ -9,6 +9,8 @@ public class OrderService : IOrderService
     private readonly HttpClient httpClient;
     private readonly ILogger<OrderService> logger;
     private readonly Random random = new();
+    private static int orderId = 0;
+    private object orderIdlock = new object();
     
     public OrderService(HttpClient httpClient, ILogger<OrderService> logger)
     {
@@ -16,16 +18,21 @@ public class OrderService : IOrderService
         this.logger = logger;
     }
 
-    public async Task PostAsync()
+    public Order GenerateOrder()
     {
-        var order = new Order
+        int newOrderId;
+        lock (orderIdlock) { newOrderId = ++orderId; }
+        return new Order
         {
-            Id = random.Next(),
-            Items = new List<int> { 3, 4, 4, 2 },
-            Priority = 3,
-            MaxWait = 45
+            Id = newOrderId,
+            Items = new List<int>(),
+            CreationTime = DateTimeOffset.UtcNow
         };
+    }
+
+    public async Task PostAsync(Order order)
+    {
         using var response = await httpClient.PostAsJsonAsync("order", order);
-        Console.WriteLine(response.ToString());
+        this.logger.LogInformation(response.ToString());
     }
 }

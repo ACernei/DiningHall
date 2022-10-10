@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using DiningHall;
 using DiningHall.Controllers;
+using DiningHall.Models;
 using DiningHall.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<TableManager>();
 
 builder.Services.AddHttpClient<IOrderService, OrderService>(httpClient =>
     {
