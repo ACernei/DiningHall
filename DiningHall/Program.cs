@@ -3,6 +3,8 @@ using DiningHall;
 using DiningHall.Controllers;
 using DiningHall.Models;
 using DiningHall.Services;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
+using Microsoft.Extensions.Logging.Console;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,16 +15,28 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHostedService<TableManager>();
+builder.Services.AddSingleton<TableManager>();
+builder.Services.AddHostedService<TableManager>(provider => provider.GetService<TableManager>());
 
 builder.Services.AddHttpClient<IOrderService, OrderService>(httpClient =>
-    {
-        httpClient.BaseAddress = new Uri("https://localhost:7226/");
-    }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-    {
-        ClientCertificateOptions = ClientCertificateOption.Manual,
-        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-    });
+{
+    httpClient.BaseAddress = new Uri("https://localhost:7226/");
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    ClientCertificateOptions = ClientCertificateOption.Manual,
+    ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+});
+
+builder.Services.AddLogging(c => c.AddSimpleConsole(options =>
+{
+    options.TimestampFormat = "[HH:mm:ss.ffff] ";
+    options.SingleLine = true;
+    options.ColorBehavior = LoggerColorBehavior.Disabled;
+}));
+
+// Read appsettings configuration
+builder.Services.Configure<DiningHallOptions>(
+    builder.Configuration.GetSection(DiningHallOptions.DiningHall));
 
 var app = builder.Build();
 
