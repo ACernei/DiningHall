@@ -1,21 +1,26 @@
+using DiningHall.Models;
+using DiningHall.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DiningHall.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("distribution")]
 public class DistributionController : ControllerBase
 {
+    private readonly TableManager tableManager;
     private readonly ILogger<DistributionController> logger;
 
-    public DistributionController(ILogger<DistributionController> logger)
+    public DistributionController(TableManager tableManager,ILogger<DistributionController> logger)
     {
+        this.tableManager = tableManager;
         this.logger = logger;
     }
 
     [HttpPost]
-    public IEnumerable<object> Post()
+    public IActionResult Post(Order order)
     {
-        return new List<object> {string.Empty};
+        this.tableManager.ServeOrder(order.Id);
+        return Ok();
     }
 }
